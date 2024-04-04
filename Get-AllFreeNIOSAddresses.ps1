@@ -5,16 +5,17 @@
 
 function Get-AllFreeNIOSAddresses {
 
-    [Int]$Count = 1000
+    [Int]$Count = 0
     [Int]$Limit = 1000
     $Results = @()
     $Network = Get-IBObject -ObjectRef "network?_paging=1&_max_results=$($Limit)&_return_as_object=1"
+    $Count += $Network.result.Count
     Write-Host "Queried $($Count) network objects"
     $NetworkResults += $Network.result
 
     while ($Network.next_page_id -ne $null) {
         $Network = Get-IBObject -ObjectRef "network?_max_results=$($Limit)&_paging=1&_return_as_object=1&_page_id=$($Network.next_page_id)"
-        $Count += $Network.Count
+        $Count += $Network.result.Count
         Write-Host "Queried $($Count) network objects"
         $NetworkResults += $Network.result
     }
