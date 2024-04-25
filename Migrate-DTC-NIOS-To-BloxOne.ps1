@@ -101,6 +101,6 @@ function Migrate-DTC-NIOS-To-BloxOne {
 
     ## Create the DTC Health Check(s)
 
-    ## Create the DTC LBDN(s)
+    ## Need to populate TTL Values & Topology Rulesets where applicable
 }
 
