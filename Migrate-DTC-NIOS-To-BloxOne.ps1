@@ -1,4 +1,29 @@
 function Migrate-DTC-NIOS-To-BloxOne {
+    <#
+    .SYNOPSIS
+        Used to build a text or HTML based visual topology of all related child networks
+
+    .DESCRIPTION
+        This function is used to build a text or HTML based visual topology of all related child networks, based on a parent IP Space, Address Block, Subnet or Range.
+
+    .PARAMETER B1DNSView
+        The DNS View within BloxOne DDI in which to assign the new LBDNs to. The LBDNs will not initialise unless the zone(s) exist within the specified DNS View.
+
+    .PARAMETER NIOSLBDN
+        The LBDN Name within NIOS that you would like to migrate to BloxOne DDI
+    
+    .EXAMPLE
+        PS> Migrate-DTC-NIOS-To-BloxOne -B1DNSView 'my-dnsview' -NIOSLBDN 'some-lbdn' -ApplyChanges
+
+    .FUNCTIONALITY
+        BloxOneDDI
+
+    .FUNCTIONALITY
+        NIOS
+    
+    .FUNCTIONALITY
+        Migration
+    #>
     param (
         [Parameter(Mandatory=$true)]
         $NIOSLBDN,
