@@ -1,16 +1,22 @@
 function Migrate-DTC-NIOS-To-BloxOne {
     <#
     .SYNOPSIS
-        Used to build a text or HTML based visual topology of all related child networks
+        Used to migrate LBDNs from NIOS DTC to BloxOne DTC
 
     .DESCRIPTION
-        This function is used to build a text or HTML based visual topology of all related child networks, based on a parent IP Space, Address Block, Subnet or Range.
+        This function is used to automate the migration of Load Balanced DNS Names and associated objects (Pools/Servers/Health Monitors) from NIOS DTC to BloxOne DTC
 
     .PARAMETER B1DNSView
         The DNS View within BloxOne DDI in which to assign the new LBDNs to. The LBDNs will not initialise unless the zone(s) exist within the specified DNS View.
 
     .PARAMETER NIOSLBDN
-        The LBDN Name within NIOS that you would like to migrate to BloxOne DDI
+        The LBDN Name within NIOS that you would like to migrate to BloxOne DDI.
+
+    .PARAMETER PolicyName
+        Optionally specify a DTC Policy name. DTC Policies are new in BloxOne DDI, so by default they will inherit the name of the DTC LBDN if this parameter is not specified.
+
+    .PARAMETER ApplyChanges
+        Using this switch will apply the changes, otherwise the expected changes will just be displayed.
     
     .EXAMPLE
         PS> Migrate-DTC-NIOS-To-BloxOne -B1DNSView 'my-dnsview' -NIOSLBDN 'some-lbdn' -ApplyChanges
@@ -29,6 +35,7 @@ function Migrate-DTC-NIOS-To-BloxOne {
         $NIOSLBDN,
         [Parameter(Mandatory=$true)]
         $B1DNSView,
+        [String]$PolicyName,
         [Switch]$ApplyChanges
     )
 
@@ -119,8 +126,11 @@ function Migrate-DTC-NIOS-To-BloxOne {
             }
         }
         
+        if (!($PolicyName)) {
+            $PolicyName = $LBDNToMigrate.name
+        }
         $NewPolicy = [PSCustomObject]@{
-            "Name" = $LBDNToMigrate.name
+            "Name" = $PolicyName
             "LoadBalancingMethod" = $LBDNToMigrate.lb_method.ToLower()
         }    
     
@@ -167,7 +177,7 @@ function Migrate-DTC-NIOS-To-BloxOne {
                 }
                 $PoolList += $PoolSplat.Name
             }
-    
+            
             $B1DTCPolicy = New-B1DTCPolicy -Name $Results.Policy.Name -LoadBalancingType $MethodArr[$Results.Policy.LoadBalancingMethod] -Pools $PoolList
             if ($B1DTCPolicy.id) {
                 Write-Host "Successfully created DTC Policy: $($B1DTCPolicy.name)" -ForegroundColor Green
@@ -186,7 +196,7 @@ function Migrate-DTC-NIOS-To-BloxOne {
     
             ## Create the DTC Health Check(s)
     
-            ## Need to populate TTL Values & Topology Rulesets where applicable
+            ## Need to populate Topology Rulesets where applicable
         }
     } else {
         Write-Error "Error - Unable to find LBDN: $($NIOSLBDN)"
